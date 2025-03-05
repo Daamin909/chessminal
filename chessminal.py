@@ -22,12 +22,6 @@ else:
     exit(0)
 
 
-with open("review.json", "w") as f:
-    import json
-    json.dump(reviewed_game, f, indent=4)
-
-
-
 def trim(text):
     if (len(text) > 25):
         return text[:15] + "..."
@@ -64,7 +58,6 @@ table.add_row(
 
 console.print(table)
 
-# Display Accuracy
 console.print(Panel("Accuracy", style="bold magenta"))
 with Progress() as progress:
     task1 = progress.add_task("[bold white]White Accuracy", total=100)
@@ -72,7 +65,6 @@ with Progress() as progress:
     progress.update(task1, advance=reviewed_game["accuracy"]["white"])
     progress.update(task2, advance=reviewed_game["accuracy"]["black"])
 
-# Move Types Table
 console.print(Panel("Move Types", style="bold blue"))
 
 move_types = Table(border_style="green")
@@ -111,13 +103,9 @@ move_types.add_row(
 )
 
 console.print(move_types)
-
-# Moves Table (Compact Format)
 console.print(Panel("Moves Analysis", style="bold yellow"))
 
 moves_table = Table(title="", show_header=True, header_style="bold green")
-
-# Add columns for a compact 2-move layout
 moves_table.add_column("Move #", justify="center", style="bold cyan")
 moves_table.add_column("Move", justify="center", style="bold yellow")
 moves_table.add_column("Eval", justify="center", style="bold magenta")
@@ -128,7 +116,6 @@ moves_table.add_column("Move", justify="center", style="bold yellow")
 moves_table.add_column("Eval", justify="center", style="bold magenta")
 moves_table.add_column("Type", justify="center", style="bold red")
 
-# Populate table in a 2-move-per-row format
 for i in range(0, len(reviewed_game["move_evaluations"]), 2):
     move1 = reviewed_game["move_evaluations"][i]
     move2 = reviewed_game["move_evaluations"][i + 1] if i + 1 < len(reviewed_game["move_evaluations"]) else {"move_no": "-", "move": "-", "eval":{"value": "-"}, "move_type": "-"}

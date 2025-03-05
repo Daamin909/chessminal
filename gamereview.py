@@ -33,7 +33,7 @@ def review_game (pgn):
         moves_fens.append(board.fen())
 
 
-    url="http://127.0.0.1:5001/api/engine"
+    url="https://daamin.hackclub.app/api/engine"
     payload = {"fens": moves_fens}  
     response = requests.post(url, json=payload)
     analysis = response.json()
