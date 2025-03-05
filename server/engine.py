@@ -2,7 +2,7 @@ from stockfish import Stockfish
 
 
 def getEngineAnalysis(FENs):
-    stockfish = Stockfish(path="/opt/homebrew/bin/stockfish", depth=8, parameters={"Threads": 1, "Minimum Thinking Time": 1, "Hash": 32, "Slow Mover": 1})
+    stockfish = Stockfish(path="/usr/games/stockfish", depth=8, parameters={"Threads": 1, "Minimum Thinking Time": 1, "Hash": 32, "Slow Mover": 1})
     response = []
     for count, FEN in enumerate(FENs):
         if (count == 0):
