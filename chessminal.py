@@ -1,4 +1,4 @@
-import validation, gamereview
+import gamereview
 from rich.console import Console
 from rich.table import Table
 from rich.progress import Progress
@@ -22,7 +22,7 @@ else:
 try:
     with open(pgn_file, "r") as f:
         pgn = f.read()
-    validity = validation.validatePGN(pgn)
+    validity = gamereview.validatePGN(pgn)
 except:
     print("File Not Found: Enter a valid path and try again.")
     exit(0)
