@@ -7,7 +7,7 @@ def isBookMove(fen):
     board = chess.Board()
     board.set_fen(fen)
     fen = board.board_fen()
-    with open("assets/openings/openings.json", "r") as file:
+    with open("assets/openings.json", "r") as file:
         openings = json.load(file)
     for opening in openings:
         if (opening['fen']==fen):
