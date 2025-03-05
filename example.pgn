@@ -2,14 +2,16 @@
 [Site "Chess.com"]
 [Date "2024.10.20"]
 [Round "?"]
-[White "Player_1"]
-[Black "Player_2"]
+[White "mido_sigma"]
+[Black "daamin_101"]
 [Result "0-1"]
 [TimeControl "600"]
 [WhiteElo "800"]
 [BlackElo "1224"]
-[Termination "Player_2 won by checkmate"]
-
+[Termination "daamin_101 won by checkmate"]
+[ECO "B01"]
+[EndTime "12:30:03 GMT+0000"]
+[Link "https://www.chess.com/game/live/123166182575"]
 
 1. e4 d5 2. exd5 Qxd5 3. Nf3 Nc6 4. Nc3 Qa5 5. b4 Qxb4 6. Rb1 Qa5 7. Bd3 e5 8.
 O-O Bg4 9. Qe1 Bxf3 10. gxf3 Nf6 11. f4 Bb4 12. fxe5 Nxe5 13. Rxb4 Qxb4 14. Bb2

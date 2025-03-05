@@ -2,7 +2,7 @@ import chess
 import io
 import chess.pgn
 from classifymoves import classifyMoves, countMoveCategories
-from engine import getEngineAnalysis
+import requests
 
 def changeFormat(pgn, infos, moves):
     game = chess.pgn.read_game(io.StringIO(pgn))
@@ -32,7 +32,11 @@ def review_game (pgn):
         moves_san.append(board.san_and_push(move))
         moves_fens.append(board.fen())
 
-    analysis = getEngineAnalysis(moves_fens)
+
+    url="http://127.0.0.1:5001/api/engine"
+    payload = {"fens": moves_fens}  
+    response = requests.post(url, json=payload)
+    analysis = response.json()
     analysis = changeFormat(pgn, analysis, moves_san)
     analysis = classifyMoves(analysis)
     analysis = countMoveCategories(analysis, pgn)
