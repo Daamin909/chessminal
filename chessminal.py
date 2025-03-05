@@ -4,9 +4,21 @@ from rich.table import Table
 from rich.progress import Progress
 from rich.panel import Panel
 from rich.text import Text
+import sys
 
 
-pgn_file = input("Enter PGN's filepath: ")
+if len(sys.argv) > 1:
+    pgn_file= sys.argv[1]
+    if pgn_file == "help":
+        print("ChessMinal is a CLI - App that allows you to Review your chess games using their PGN.")
+        print("Game Review is chess.com's paid (1 per day is free) feature that helps you to improve your chess skills and become a better player.")
+        print("How to use: Visit github.com/daamin909/chessminal for a complete guide.")
+        exit(0)
+else:
+    pgn_file = input("Enter PGN's filepath: ")
+
+
+
 try:
     with open(pgn_file, "r") as f:
         pgn = f.read()
