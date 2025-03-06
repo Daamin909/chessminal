@@ -59,7 +59,7 @@ chessminal 'path/to/your/pgn/file'
 
 ## Example Game Review
 
-![ss]("https://github.com/user-attachments/assets/061c951a-2c7e-4d3c-ab5f-6099e4903142")
+![ss](https://i.imgur.com/RDb4pbu.png)
 """,
     long_description_content_type="text/markdown",
 )
