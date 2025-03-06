@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 
 from engine import getEngineAnalysis
@@ -10,6 +10,10 @@ def getEngine():
     FENs = request.get_json()['fens']
     analysis = getEngineAnalysis(FENs)
     return jsonify(analysis)
+
+@app.route('/openings.json')
+def serve_json():
+    return send_from_directory('static', 'openings.json')
 
 
 if __name__ == '__main__':
