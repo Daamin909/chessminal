@@ -11,8 +11,7 @@ def main():
     if len(sys.argv) > 1:
         pgn_file= sys.argv[1]
     else:
-        print("ChessMinal is a CLI - App that allows you to Review your chess games using their PGN.")
-        print("Game Review is chess.com's paid (1 per day is free) feature that helps you to improve your chess skills and become a better player.")
+        print("ChessMinal is a CLI - App that allows you to review your chess games.")
         print("To review your Game: Run chessminal \'path/to/your/pgn/file\'. ")
         print("For more info: Visit github.com/daamin909/chessminal")
         exit(0)
