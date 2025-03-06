@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="chessminal",
-    version="2.1.2",
+    version="2.1.3",
     packages=["chessminal"],
     package_data={},
     include_package_data=True,
