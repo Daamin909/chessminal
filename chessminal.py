@@ -1,16 +1,28 @@
-import validation, gamereview
+import gamereview
 from rich.console import Console
 from rich.table import Table
 from rich.progress import Progress
 from rich.panel import Panel
 from rich.text import Text
+import sys
 
 
-pgn_file = input("Enter PGN's filepath: ")
+if len(sys.argv) > 1:
+    pgn_file= sys.argv[1]
+    if pgn_file == "help":
+        print("ChessMinal is a CLI - App that allows you to Review your chess games using their PGN.")
+        print("Game Review is chess.com's paid (1 per day is free) feature that helps you to improve your chess skills and become a better player.")
+        print("How to use: Visit github.com/daamin909/chessminal for a complete guide.")
+        exit(0)
+else:
+    pgn_file = input("Enter PGN's filepath: ")
+
+
+
 try:
     with open(pgn_file, "r") as f:
         pgn = f.read()
-    validity = validation.validatePGN(pgn)
+    validity = gamereview.validatePGN(pgn)
 except:
     print("File Not Found: Enter a valid path and try again.")
     exit(0)
@@ -20,12 +32,6 @@ if (validity):
 else:
     print("Invalid PGN: Please try again.")
     exit(0)
-
-
-with open("review.json", "w") as f:
-    import json
-    json.dump(reviewed_game, f, indent=4)
-
 
 
 def trim(text):
@@ -64,7 +70,6 @@ table.add_row(
 
 console.print(table)
 
-# Display Accuracy
 console.print(Panel("Accuracy", style="bold magenta"))
 with Progress() as progress:
     task1 = progress.add_task("[bold white]White Accuracy", total=100)
@@ -72,7 +77,6 @@ with Progress() as progress:
     progress.update(task1, advance=reviewed_game["accuracy"]["white"])
     progress.update(task2, advance=reviewed_game["accuracy"]["black"])
 
-# Move Types Table
 console.print(Panel("Move Types", style="bold blue"))
 
 move_types = Table(border_style="green")
@@ -111,13 +115,9 @@ move_types.add_row(
 )
 
 console.print(move_types)
-
-# Moves Table (Compact Format)
 console.print(Panel("Moves Analysis", style="bold yellow"))
 
 moves_table = Table(title="", show_header=True, header_style="bold green")
-
-# Add columns for a compact 2-move layout
 moves_table.add_column("Move #", justify="center", style="bold cyan")
 moves_table.add_column("Move", justify="center", style="bold yellow")
 moves_table.add_column("Eval", justify="center", style="bold magenta")
@@ -128,7 +128,6 @@ moves_table.add_column("Move", justify="center", style="bold yellow")
 moves_table.add_column("Eval", justify="center", style="bold magenta")
 moves_table.add_column("Type", justify="center", style="bold red")
 
-# Populate table in a 2-move-per-row format
 for i in range(0, len(reviewed_game["move_evaluations"]), 2):
     move1 = reviewed_game["move_evaluations"][i]
     move2 = reviewed_game["move_evaluations"][i + 1] if i + 1 < len(reviewed_game["move_evaluations"]) else {"move_no": "-", "move": "-", "eval":{"value": "-"}, "move_type": "-"}
