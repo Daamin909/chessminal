@@ -5,14 +5,13 @@ from rich.panel import Panel
 from rich.text import Text
 import sys
 import math
-import json
 import chess
 import re
 import io
 import chess.pgn
 import requests
 from contextlib import redirect_stdout, redirect_stderr
-
+from openings import openings
 
 def player_info(pgn):
     white_player = re.search(r'\[White\s+"([^"]+)"', pgn)
@@ -34,7 +33,6 @@ def isBookMove(fen):
     board = chess.Board()
     board.set_fen(fen)
     fen = board.board_fen()
-    openings = requests.get("https://daamin.hackclub.app/openings.json").json()
     for opening in openings:
         if (opening['fen']==fen):
             return [True, opening['name']]

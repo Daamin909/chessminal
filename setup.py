@@ -3,8 +3,8 @@ from setuptools import setup
 setup(
     name="chessminal",
     version="1.8",
-    packages=["chessminal", "chessminal.assets"],
-    package_data={'chessminal': ['assets/*.json']},
+    packages=["chessminal", "chessminal.*"],
+    package_data={},
     include_package_data=True,
     install_requires=[
         "chess",
