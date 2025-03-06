@@ -1,6 +1,6 @@
 # chessminal - free game review in a terminal
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
-![Version](https://img.shields.io/badge/version-2.1.1-brightgreen.svg)
+![Version](https://img.shields.io/badge/version-2.1.4-brightgreen.svg)
 
 A terminal application that grades your chess games from their PGN notation.
 

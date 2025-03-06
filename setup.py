@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="chessminal",
-    version="2.1.3",
+    version="2.1.4",
     packages=["chessminal"],
     package_data={},
     include_package_data=True,
@@ -22,7 +22,7 @@ setup(
     long_description="""
 # chessminal - free game review in a terminal
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
-![Version](https://img.shields.io/badge/version-2.1.1-brightgreen.svg)
+![Version](https://img.shields.io/badge/version-2.1.4-brightgreen.svg)
 
 A terminal application that grades your chess games from their PGN notation.
 
