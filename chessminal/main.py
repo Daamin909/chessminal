@@ -1,7 +1,18 @@
+from rich.console import Console
+from rich.table import Table
+from rich.progress import Progress
+from rich.panel import Panel
+from rich.text import Text
+import sys
 import math
 import json
 import chess
 import re
+import io
+import chess.pgn
+import requests
+from contextlib import redirect_stdout, redirect_stderr
+
 
 def player_info(pgn):
     white_player = re.search(r'\[White\s+"([^"]+)"', pgn)
@@ -23,8 +34,7 @@ def isBookMove(fen):
     board = chess.Board()
     board.set_fen(fen)
     fen = board.board_fen()
-    with open("assets/openings.json", "r") as file:
-        openings = json.load(file)
+    openings = requests.get("https://daamin.hackclub.app/openings.json").json()
     for opening in openings:
         if (opening['fen']==fen):
             return [True, opening['name']]
@@ -224,3 +234,208 @@ def correctBookMoves(analysis):
 
 
     return analysis
+
+
+
+# the below function is used to check if the PGN format is correct or not
+def checkPGNFormat(pgn):
+    output = io.StringIO()
+    with redirect_stdout(output), redirect_stderr(output):
+        try:
+            game = chess.pgn.read_game(io.StringIO(pgn))
+        except Exception:
+            pass
+    console_output = output.getvalue().lower()
+    if "illegal san:" in console_output or "illegal move" in console_output:
+        return False
+    else:
+        game = chess.pgn.read_game(io.StringIO(pgn))
+        gameString = str(game)
+        if game is None:
+            return False
+        elif "1." not in gameString:
+            return False
+    return True
+
+
+# the below function is used to check if the moves are legal or not
+def validatePGN(pgn):
+    if not checkPGNFormat(pgn):
+        return False
+    game = chess.pgn.read_game(io.StringIO(pgn))
+    board = chess.Board()
+    for move in game.mainline_moves():
+        if board.is_legal(move):
+            board.push(move)
+        else:
+            return False
+    return True  
+
+
+def changeFormat(pgn, infos, moves):
+    game = chess.pgn.read_game(io.StringIO(pgn))
+    board = game.board()
+    default_fen = board.fen()
+    for counter, (info, move) in enumerate(zip(infos, moves)):
+
+        if (info['eval']['type']!='mate'):
+            info['eval']['value']/=100
+        if (not info['best_move']):
+            info['best_move'] = (None)
+        else:
+            board.set_fen(infos[counter-1]['fen'])
+            info['best_move'] = (board.san(chess.Move.from_uci(info['best_move'])))
+            board.set_fen(default_fen)    
+        info['move'] = move
+    return infos
+
+def review_game (pgn):
+    game = chess.pgn.read_game(io.StringIO(pgn))
+    board = game.board()
+    moves = game.mainline_moves()
+    moves_fens = [board.fen()]
+    moves_san = [None]
+
+    for move in moves:
+        moves_san.append(board.san_and_push(move))
+        moves_fens.append(board.fen())
+
+
+    url="https://daamin.hackclub.app/api/engine"
+    payload = {"fens": moves_fens}  
+    response = requests.post(url, json=payload)
+    analysis = response.json()
+    analysis = changeFormat(pgn, analysis, moves_san)
+    analysis = classifyMoves(analysis)
+    analysis = countMoveCategories(analysis, pgn)
+    return analysis
+
+
+def main():
+    if len(sys.argv) > 1:
+        pgn_file= sys.argv[1]
+        if pgn_file == "help":
+            print("ChessMinal is a CLI - App that allows you to Review your chess games using their PGN.")
+            print("Game Review is chess.com's paid (1 per day is free) feature that helps you to improve your chess skills and become a better player.")
+            print("How to use: Visit github.com/daamin909/chessminal for a complete guide.")
+            exit(0)
+    else:
+        pgn_file = input("Enter PGN's filepath: ")
+
+
+
+    try:
+        with open(pgn_file, "r") as f:
+            pgn = f.read()
+        validity = validatePGN(pgn)
+    except:
+        print("File Not Found: Enter a valid path and try again.")
+        exit(0)
+
+    if (validity):
+        reviewed_game = review_game(pgn)
+    else:
+        print("Invalid PGN: Please try again.")
+        exit(0)
+
+
+    console = Console()
+    chess_text = Text("""
+    ▄████▄    ██░ ██ ▓    █████       ██████      ██████  
+    ▒██▀ ▀█    ▓██░ ██▒    ▓█   ▀▒     ██    ▒     ▒██    
+    ▒▓█    ▄   ▒██▀▀██░    ▒███  ░     ▓██▄  ░     ▓██▄  ░  
+    ▒▓▓▄ ▄██▒  ░▓█ ░██     ▒▓█  ▄      ▒   ██▒     ▒   ██▒ 
+    ▒ ▓███▀    ░░▓█▒░██    ▓░▒████▒    ██████▒▒    ██████▒                                          
+    """, style="bold green")
+
+    console.print(chess_text)
+
+
+    console = Console()
+
+    table = Table(title="", style="bold green", border_style="bright_blue")
+    table.add_column("White Player", justify="center", style="bold white")
+    table.add_column("White Rating", justify="center", style="bold yellow")
+    table.add_column("Black Player", justify="center", style="bold white")
+    table.add_column("Black Rating", justify="center", style="bold yellow")
+
+    table.add_row(
+        reviewed_game["info"]["white_player"],
+        reviewed_game["info"]["white_rating"],
+        reviewed_game["info"]["black_player"],
+        reviewed_game["info"]["black_rating"]
+    )
+
+    console.print(table)
+
+    console.print(Panel("Accuracy", style="bold magenta"))
+    with Progress() as progress:
+        task1 = progress.add_task("[bold white]White Accuracy", total=100)
+        task2 = progress.add_task("[bold white]Black Accuracy", total=100)
+        progress.update(task1, advance=reviewed_game["accuracy"]["white"])
+        progress.update(task2, advance=reviewed_game["accuracy"]["black"])
+
+    console.print(Panel("Move Types", style="bold blue"))
+
+    move_types = Table(border_style="green")
+    move_types.add_column("Player", justify="center")
+    move_types.add_column("Best Move", justify="center")
+    move_types.add_column("Excellent", justify="center")
+    move_types.add_column("Good", justify="center")
+    move_types.add_column("Inaccuracy", justify="center")
+    move_types.add_column("Mistake", justify="center")
+    move_types.add_column("Blunder", justify="center")
+    move_types.add_column("Book Moves", justify="center")
+
+    w_moves = reviewed_game["number_of_move_types"]["w"]
+    b_moves = reviewed_game["number_of_move_types"]["b"]
+
+    move_types.add_row(
+        "White",
+        str(w_moves["best_move"]),
+        str(w_moves["excellent"]),
+        str(w_moves["good"]),
+        str(w_moves["inaccuracy"]),
+        str(w_moves["mistake"]),
+        str(w_moves["blunder"]),
+        str(w_moves["book_move"])
+    )
+
+    move_types.add_row(
+        "Black",
+        str(b_moves["best_move"]),
+        str(b_moves["excellent"]),
+        str(b_moves["good"]),
+        str(b_moves["inaccuracy"]),
+        str(b_moves["mistake"]),
+        str(b_moves["blunder"]),
+        str(b_moves["book_move"])
+    )
+
+    console.print(move_types)
+    console.print(Panel("Moves Analysis", style="bold yellow"))
+
+    moves_table = Table(title="", show_header=True, header_style="bold green")
+    moves_table.add_column("Move #", justify="center", style="bold cyan")
+    moves_table.add_column("Move", justify="center", style="bold yellow")
+    moves_table.add_column("Eval", justify="center", style="bold magenta")
+    moves_table.add_column("Type", justify="center", style="bold red")
+
+    moves_table.add_column("Move #", justify="center", style="bold cyan")
+    moves_table.add_column("Move", justify="center", style="bold yellow")
+    moves_table.add_column("Eval", justify="center", style="bold magenta")
+    moves_table.add_column("Type", justify="center", style="bold red")
+
+    for i in range(0, len(reviewed_game["move_evaluations"]), 2):
+        move1 = reviewed_game["move_evaluations"][i]
+        move2 = reviewed_game["move_evaluations"][i + 1] if i + 1 < len(reviewed_game["move_evaluations"]) else {"move_no": "-", "move": "-", "eval":{"value": "-"}, "move_type": "-"}
+        
+        moves_table.add_row(
+            str(move1["move_no"]), move1["move"], str(move1["eval"]['value']), move1["move_type"],
+            str(move2["move_no"]), move2["move"], str(move2["eval"]['value']), move2["move_type"]
+        )
+    console.print(moves_table)
+
+
+if __name__ =="__main__":
+    main()

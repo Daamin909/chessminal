@@ -1,2 +1,5 @@
-chessminal
+env
 __pycache__
+chessminal.egg-info
+dist
+build
