@@ -2,8 +2,8 @@ from setuptools import setup
 
 setup(
     name="chessminal",
-    version="1.8",
-    packages=["chessminal", "chessminal.*"],
+    version="2.0",
+    packages=["chessminal"],
     package_data={},
     include_package_data=True,
     install_requires=[
